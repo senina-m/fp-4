@@ -1,7 +1,7 @@
 ; curl -O https://beta.quicklisp.org/quicklisp.lisp
 ; curl -O https://beta.quicklisp.org/quicklisp.lisp.asc
 ; sbcl --load quicklisp.lisp
-; * (quicklisp-quickstart:install)
+; (quicklisp-quickstart:install)
 (ql:quickload :ltk)
 (ql:quickload :asdf)
 (in-package :ltk-user)
@@ -10,7 +10,10 @@
 
 (defun add_number(num cur-num oper first-num label)
   (let ((new-cur (+ (* cur-num 10) num)))
-    (when (not (null oper)) (setf (text label) (funcall oper first-num new-cur)))
+    (handler-case
+      (when (not (null oper))
+            (setf (text label) (format nil "~f~%" (funcall oper first-num new-cur))))
+      (division-by-zero () (setf (text label) "devidion by zero")))
     new-cur))
 
 (defun main()

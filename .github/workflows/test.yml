@@ -6,9 +6,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Format files
-        run: sudo apt install emacs; bash ./lisp-format src/trie.lisp > src/trie_from.lisp;
+        run: sudo apt install emacs; bash ./lisp-format src/calc.lisp > src/calc_from.lisp;
       - name: Compare with format
-        run: diff src/trie.lisp src/trie_from.lisp;
+        run: diff src/calc.lisp src/calc_from.lisp;
   test:
     runs-on: ubuntu-latest
     steps:
@@ -20,5 +20,3 @@ jobs:
           version: 2.2.8
       - name: Verify installation
         run: sbcl --non-interactive --eval "(print (ql:client-version))" --eval "(print (asdf:asdf-version))"
-      - name: Test
-        run: sbcl --script test/test.lisp

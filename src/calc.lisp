@@ -19,39 +19,24 @@
       (division-by-zero () (setf (text label) "devidion by zero")))
     new-cur))
 
-(defmacro n()
-  (loop :for num from 0 to 3
-                :collect (if (equal num 0)
-                            `progn
-                            `(set (intern ,(format nil "b~a" num)) ,num)))
-  (let ((num -1))
-    (loop :for i from 1 to 2
-            :append (loop :for j from 1 to 2
-                          :until (equal num 10)
-                          :collect (if (equal num -1)
-                                      `progn
-                                      `(print (intern ,(format nil "b~a" num))))
-                          :do (setf num (+ num 1))))))
-
-(defun run-n()
-  (n))
-
 (defmacro number-buttons(f cur-num oper first-num label)
-  `(let ,(loop :for num from 0 to 10
-                :collect `( ,(format nil "b~a" num)
-                            (make-instance 'button
-                                    :master ,f
-                                    :text ,(format nil "~a" num)
-                                    :command (lambda () (progn (setf ,cur-num (add_number ,num ,cur-num ,oper ,first-num ,label)) 
-                                                              (format t "~a~&", num))))))
+`(progn ,(loop :for num from -1 to 10
+                    :collect  (if (equal num -1)
+                                  `progn 
+                                  `(set (intern ,(format nil "b~a" num))
+                                        (make-instance 'button
+                                            :master ,f
+                                            :text ,(format nil "~a" num)
+                                            :command (lambda () (progn (setf ,cur-num (add_number ,num ,cur-num ,oper ,first-num ,label))
+                                                                        (format t "~a~&", num)))))))
         ,(let ((num -1))
-              (loop :for i from 1 to 4
-                      :append (loop :for j from 1 to 5
-                                    :until (equal num 10)
-                                    :collect (if (equal num -1)
-                                                `progn
-                                                `(grid ,(format nil "b~a" num) ,i ,j :sticky :e))
-                                    :do (setf num (+ num 1)))))))
+            (loop :for i from 1 to 5
+                    :append (loop :for j from 1 to 3
+                                  :until (equal num 10)
+                                  :collect (if (equal num -1)
+                                              `progn
+                                              `(grid (symbol-value (intern ,(format nil "b~a" num))) ,i ,j :sticky :e))
+                                  :do (setf num (+ num 1)))))))
 ; (macroexpand '(number-buttons 1 2 3 4 5))
 
 (defun main()

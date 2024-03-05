@@ -39,6 +39,34 @@
                                   :do (setf num (+ num 1)))))))
 ; (macroexpand '(number-buttons 1 2 3 4 5))
 
+(defmacro operation-buttons(f first-num cur-num oper)
+  (let ((opers (list (cons "progn" "progn")
+                                        (cons #'+ "+")
+                                        (cons #'- "-")
+                                        (cons #'* "*")
+                                        (cons #'/ "/"))))
+    `(progn ,(mapcar (lambda (o)
+                        (if (equal (cdr o) "progn")
+                            `progn
+                            `(set (intern ,(format nil "b~a" (cdr o)))
+                                (make-instance 'button
+                                    :master ,f
+                                    :text ,(cdr o)
+                                    :command (lambda () (progn (setf ,oper ,(car o))
+                                            (setf ,first-num ,cur-num)
+                                            (setf ,cur-num 0) 
+                                            (format t "~a~&" ,(cdr o))))))))
+                      opers)
+              ,(let ((num 0))
+                    (mapcar (lambda (o) 
+                                    (progn (setf num (+ num 1))
+                                          (if (equal (cdr o) "progn")
+                                              `progn
+                                              `(grid (symbol-value (intern ,(format nil "b~a" (cdr o)))) ,(- num 1) 4  :sticky :e)))) opers)))))
+
+; (macroexpand '(operation-buttons 1 2 3))
+
+
 (defun main()
   (with-ltk ()
    (let* ((first-num 0)
@@ -55,35 +83,7 @@
                                                         (setf cur-num 0)
                                                         (setf oper nil)
                                                         (setf (text label) "")
-                                                        (format t "clear~&")))))
-          (b+ (make-instance 'button
-                             :master f
-                             :text "+"
-                             :command (lambda () (progn (setf oper #'+)
-                                                        (setf first-num cur-num)
-                                                        (setf cur-num 0) 
-                                                        (format t "+~&")))))
-          (b- (make-instance 'button
-                             :master f
-                             :text "-"
-                             :command (lambda () (progn (setf oper #'-)
-                                                        (setf first-num cur-num)
-                                                        (setf cur-num 0) 
-                                                        (format t "-~&")))))
-          (b* (make-instance 'button
-                             :master f
-                             :text "*"
-                             :command (lambda () (progn (setf oper #'*)
-                                                        (setf first-num cur-num)
-                                                        (setf cur-num 0) 
-                                                        (format t "*~&")))))
-          (b/ (make-instance 'button
-                             :master f
-                             :text "/"
-                             :command (lambda () (progn (setf oper #'/)
-                                                        (setf first-num cur-num)
-                                                        (setf cur-num 0) 
-                                                        (format t "/~&"))))))
+                                                        (format t "clear~&"))))))
           (grid f 0 0
                         :sticky :n
                         :padx 3
@@ -91,8 +91,5 @@
                         :rowspan 3)
           (grid label 0 1)
           (grid clear 0 4)
-          (grid b+ 1 4  :sticky :e)
-          (grid b- 2 4  :sticky :e)
-          (grid b* 3 4  :sticky :e)
-          (grid b/ 4 4  :sticky :e)
+          (operation-buttons f first-num cur-num oper)
           (number-buttons f cur-num oper first-num label))))

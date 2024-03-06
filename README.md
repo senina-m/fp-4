@@ -122,29 +122,25 @@ sbcl
 
 ```
 (defmacro operation-buttons(f first-num cur-num oper)
-  (let ((opers (list (cons "progn" "progn")
-                     (cons #'+ "+")
+  (let ((opers (list (cons #'+ "+")
                      (cons #'- "-")
                      (cons #'* "*")
-                     (cons #'/ "/"))))
+                     (cons #'/ "/")))
+        (num 0))
     `(progn ,(mapcar (lambda (o)
-                       (if (equal (cdr o) "progn")
-                           `progn
-                         `(set (intern ,(format nil "b~a" (cdr o)))
-                               (make-instance 'button
-					      :master ,f
-					      :text ,(cdr o)
-					      :command (lambda () (progn (setf ,oper ,(car o))
-									 (setf ,first-num ,cur-num)
-									 (setf ,cur-num 0)
-									 (format t "~a~&" ,(cdr o))))))))
-                     opers)
-            ,(let ((num 0))
-               (mapcar (lambda (o)
-                         (progn (setf num (+ num 1))
-                                (if (equal (cdr o) "progn")
-                                    `progn
-                                  `(grid (symbol-value (intern ,(format nil "b~a" (cdr o)))) ,(- num 1) 4  :sticky :e)))) opers)))))
+                        (progn
+                          (setf num (+ num 1))
+                          `(progn 
+                              (set (intern ,(format nil "b~a" (cdr o)))
+                                (make-instance 'button
+                                                :master ,f
+                                                :text ,(cdr o)
+                                                :command (lambda () (progn (setf ,oper ,(car o))
+                                                  (setf ,first-num ,cur-num)
+                                                  (setf ,cur-num 0)
+                                                  (format t "~a~&" ,(cdr o))))))
+                              (grid (symbol-value (intern ,(format nil "b~a" (cdr o)))) ,num 4  :sticky :e))))
+                       opers))))
 ```
 
 ```

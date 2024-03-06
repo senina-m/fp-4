@@ -29,14 +29,12 @@
 						  :text ,(format nil "~a" num)
 						  :command (lambda () (progn (setf ,cur-num (add_number ,num ,cur-num ,oper ,first-num ,label))
 									     (format t "~a~&", num)))))))
-          ,(let ((num -1))
-             (loop :for i from 1 to 5
-                   :append (loop :for j from 1 to 3
-                                 :until (equal num 10)
-                                 :collect (if (equal num -1)
-                                              `progn
-                                            `(grid (symbol-value (intern ,(format nil "b~a" num))) ,i ,j :sticky :e))
-                                 :do (setf num (+ num 1)))))))
+          (progn ,@(let ((num 0))
+		     (loop :for i from 1 to 5
+			   :append (loop :for j from 1 to 3
+					 :until (equal num 10)
+					 :collect `(grid (symbol-value (intern ,(format nil "b~a" num))) ,i ,j :sticky :e)
+					 :do (setf num (+ num 1))))))))
 					; (macroexpand '(number-buttons 1 2 3 4 5))
 
 (defmacro operation-buttons(f first-num cur-num oper)
@@ -45,21 +43,20 @@
                      (cons #'* "*")
                      (cons #'/ "/")))
         (num 0))
-    `(progn ,(mapcar (lambda (o)
-                       (progn
-                         (setf num (+ num 1))
-                         `(progn
-                            (set (intern ,(format nil "b~a" (cdr o)))
-                                 (make-instance 'button
-                                                :master ,f
-                                                :text ,(cdr o)
-                                                :command (lambda () (progn (setf ,oper ,(car o))
-									   (setf ,first-num ,cur-num)
-									   (setf ,cur-num 0)
-									   (format t "~a~&" ,(cdr o))))))
-                            (grid (symbol-value (intern ,(format nil "b~a" (cdr o)))) ,num 4  :sticky :e))))
-                     opers))))
-
+    `(progn ,@(mapcar (lambda (o)
+			(progn
+                          (setf num (+ num 1))
+                          `(progn
+                             (set (intern ,(format nil "b~a" (cdr o)))
+                                  (make-instance 'button
+                                                 :master ,f
+                                                 :text ,(cdr o)
+                                                 :command (lambda () (progn (setf ,oper ,(car o))
+									    (setf ,first-num ,cur-num)
+									    (setf ,cur-num 0)
+									    (format t "~a~&" ,(cdr o))))))
+                             (grid (symbol-value (intern ,(format nil "b~a" (cdr o)))) ,num 4  :sticky :e))))
+                      opers))))
 					; (macroexpand '(operation-buttons 1 2 3 4))
 
 
